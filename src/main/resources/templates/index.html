@@ -37,27 +37,28 @@
             <main class="mdl-layout__content">
                 <div class="sb-videoconverter__upload mdl-grid">
                     <div id="upload-container">
+                        <form method="POST" action="/storage/upload" enctype="multipart/form-data">
+                            <div class="file_input_div">
+                                <label> Selecione o arquivo de vídeo</label>
+                                <div class="file_input">
+                                    <label class="image_input_button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored">
+                                        <i class="material-icons">file_upload</i>
+                                        <input id="file_input_file" class="none" type="file" />
+                                    </label>
+                                </div>
 
-                        <div class="file_input_div">
-                            <label> Selecione o arquivo de vídeo</label>
-                            <div class="file_input">
-                                <label class="image_input_button mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored">
-                                    <i class="material-icons">file_upload</i>
-                                    <input id="file_input_file" class="none" type="file" />
-                                </label>
+                                <div id="file_input_text_div" class="mdl-textfield mdl-js-textfield textfield-demo">
+                                    <input class="file_input_text mdl-textfield__input" type="text" disabled readonly id="file_input_text" />
+                                    <label class="mdl-textfield__label" for="file_input_text"></label>
+                                </div>
                             </div>
 
-                            <div id="file_input_text_div" class="mdl-textfield mdl-js-textfield textfield-demo">
-                                <input class="file_input_text mdl-textfield__input" type="text" disabled readonly id="file_input_text" />
-                                <label class="mdl-textfield__label" for="file_input_text"></label>
+                            <div class="meta meta--fill mdl-color-text--grey-600 justify-center">
+                                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                                    Converter
+                                </button>
                             </div>
-                        </div>
-
-                        <div class="meta meta--fill mdl-color-text--grey-600 justify-center">
-                            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                                Converter
-                            </button>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </main>

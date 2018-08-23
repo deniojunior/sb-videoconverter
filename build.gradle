@@ -23,9 +23,19 @@ repositories {
 	mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom 'com.amazonaws:aws-java-sdk-bom:1.11.228'
+    }
+}
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-thymeleaf')
 	compile('org.springframework.boot:spring-boot-starter-web')
+    compile 'com.amazonaws:aws-java-sdk-s3'
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+processResources {
+	expand(project.properties)
 }
