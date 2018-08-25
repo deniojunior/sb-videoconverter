@@ -10,11 +10,10 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.springframework.beans.factory.annotation.Value ;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import util.Utility;
+import io.sbvideoconverter.sbvideoconverter.util.Utility;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.util.Date;
 
 @Service
 public class AmazonS3Service {
@@ -33,6 +32,9 @@ public class AmazonS3Service {
     @Value("${s3-properties.region}")
     private String region;
 
+    @Value("${s3-properties.endpointUrl}")
+    private String endpointUrl;
+
     @PostConstruct
     public void initializeAmazon() {
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
@@ -42,26 +44,25 @@ public class AmazonS3Service {
                 .build();
     }
 
-    private String generateFileName(MultipartFile multiPart) {
-        return new Date().getTime() + "-" + multiPart.getOriginalFilename().replace(" ", "_");
-    }
-
     private void uploadFileTos3bucket(String fileName, File file) {
         s3client.putObject(new PutObjectRequest(bucketName, fileName, file)
                 .withCannedAcl(CannedAccessControlList.PublicRead));
     }
 
-    public boolean uploadFile(MultipartFile multipartFile) {
+    public String uploadFile(MultipartFile multipartFile) {
+
+        String fileUrl = "";
 
         try {
             File file = Utility.convertMultiPartToFile(multipartFile);
-            String fileName = generateFileName(multipartFile);
+            String fileName = Utility.generateFileName(multipartFile, "uploaded_");
             uploadFileTos3bucket(fileName, file);
+            fileUrl = endpointUrl + fileName;
             file.delete();
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
-        return true;
+
+        return fileUrl;
     }
 }
