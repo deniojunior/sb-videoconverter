@@ -2,37 +2,44 @@ package io.sbvideoconverter.sbvideoconverter.services;
 
 import io.sbvideoconverter.sbvideoconverter.util.Utility;
 import org.junit.Test;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.File;
-import java.nio.file.Paths;
+import java.util.Date;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
 public class ZencoderServiceTest {
 
-    private static final String TEST_FILE_PATH = "/src/test/resources/sample_video.mp4";
-    private static final String TEST_FILE_NAME = "sample_video.mp4";
+    private static final String TEST_FILE_NAME = "sample_video.3gp";
 
     @Test
-    public void encode() {
-        boolean uploadStatus = false;
+    public void convert() {
+        boolean succeeded = false;
 
         try {
+            AmazonS3Service amazonS3Service = new AmazonS3Service();
+            ReflectionTestUtils.setField(amazonS3Service, "bucketName", System.getenv("S3_BUCKET_NAME"));
+            ReflectionTestUtils.setField(amazonS3Service, "accessKey", System.getenv("S3_ACCESS_KEY"));
+            ReflectionTestUtils.setField(amazonS3Service, "secretKey", System.getenv("S3_SECRET_KEY"));
+            ReflectionTestUtils.setField(amazonS3Service, "region", System.getenv("S3_REGION"));
+            amazonS3Service.initializeAmazon();
+
             ZencoderService zencoderService = new ZencoderService();
-            String currentPath = Paths.get(".").toAbsolutePath().normalize().toString();
-            File file = new File(currentPath + TEST_FILE_PATH);
+            ReflectionTestUtils.setField(zencoderService, "endpointUrl", System.getenv("ZENCODER_ENDPOINT_URL"));
+            ReflectionTestUtils.setField(zencoderService, "apiKey", System.getenv("ZENCODER_API_KEY"));
 
-            MultipartFile multipartFile = Utility.convertFileToMultipartFile(file);
+            String filePath = amazonS3Service.getS3FileTransferURL() + TEST_FILE_NAME;
+            String outputFilePath = amazonS3Service.getS3FileTransferURL() + "converted_" + new Date().getTime() +
+                    Utility.FILE_NAME_SEPARATOR + TEST_FILE_NAME + "." + ZencoderService.DEFAULT_OUTPUT_FORMAT;
 
-            if (multipartFile != null) {
-                String filePath = "http://sb-video-bucket.s3-sa-east-1.amazonaws.com/" + TEST_FILE_NAME;
-                uploadStatus = zencoderService.encode(filePath, TEST_FILE_NAME);
-            }
+            Map<String, String> result = zencoderService.convert(filePath, outputFilePath);
+            succeeded = result.get("status").equals("success");
+
         }catch (Exception e){
             e.printStackTrace();
         }
 
-        assertTrue(uploadStatus);
+        assertTrue(succeeded);
     }
 }

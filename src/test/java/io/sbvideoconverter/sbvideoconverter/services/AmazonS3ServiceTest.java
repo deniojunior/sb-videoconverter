@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -33,9 +34,12 @@ public class AmazonS3ServiceTest {
             MultipartFile multipartFile = Utility.convertFileToMultipartFile(file);
 
             if (multipartFile != null) {
-                String uploadedFileUrl = amazonS3Service.uploadFile(multipartFile);
-                if(!StringUtils.isEmpty(uploadedFileUrl)) {
-                    uploadStatus = true;
+                Map<String, String> response = amazonS3Service.uploadFile(multipartFile);
+                if(response.get("status").equals("success")) {
+                    String uploadedFileUrl = response.get("file-url");
+                    if (!StringUtils.isEmpty(uploadedFileUrl)) {
+                        uploadStatus = true;
+                    }
                 }
             }
         }catch (Exception e){

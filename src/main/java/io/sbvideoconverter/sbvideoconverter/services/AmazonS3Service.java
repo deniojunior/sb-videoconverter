@@ -5,6 +5,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.springframework.beans.factory.annotation.Value ;
@@ -14,6 +15,9 @@ import io.sbvideoconverter.sbvideoconverter.util.Utility;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AmazonS3Service {
@@ -49,20 +53,58 @@ public class AmazonS3Service {
                 .withCannedAcl(CannedAccessControlList.PublicRead));
     }
 
-    public String uploadFile(MultipartFile multipartFile) {
+    public Map<String, String> uploadFile(MultipartFile multipartFile) {
 
+        Map<String, String> result = new HashMap<>();
         String fileUrl = "";
 
         try {
             File file = Utility.convertMultiPartToFile(multipartFile);
-            String fileName = Utility.generateFileName(multipartFile, "uploaded_");
+            String fileName = Utility.generateFileName(multipartFile, "uploaded_" + new Date().getTime());
             uploadFileTos3bucket(fileName, file);
             fileUrl = endpointUrl + fileName;
             file.delete();
+
+            result.put("status", "success");
+            result.put("message", "Success");
+            result.put("file-url", fileUrl);
+
+        } catch (AmazonS3Exception e){
+            result.put("status", "error");
+            result.put("message", "Erro ao fazer o upload para o Amazon S3: " + e.getMessage());
+            result.put("file-url", "");
+            e.printStackTrace();
         } catch (Exception e) {
+            result.put("status", "error");
+            result.put("message", e.getMessage());
+            result.put("file-url", "");
             e.printStackTrace();
         }
 
-        return fileUrl;
+        return result;
+    }
+
+    public String getS3FileTransferURL(){
+        return "s3://"+this.bucketName+"/";
+    }
+
+    public String getBucketName() {
+        return bucketName;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public String getEndpointUrl() {
+        return endpointUrl;
     }
 }
