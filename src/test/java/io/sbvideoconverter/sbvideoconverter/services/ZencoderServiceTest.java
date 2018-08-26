@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 
 public class ZencoderServiceTest {
 
-    private static final String TEST_FILE_NAME = "sample_video.3gp";
+    private static final String TEST_FILE_NAME = "sample_video";
 
     @Test
     public void convert() {
