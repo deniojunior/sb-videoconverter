@@ -28,9 +28,26 @@ function changeState() {
     }
 }
 
+function progress(e){
+
+    if(e.lengthComputable){
+        var max = e.total;
+        var current = e.loaded;
+
+        var percentage = (current * 100)/max;
+
+        var value = percentage + '%';
+        $("#bar").animate({width: value}, 75, 'linear', function() {
+            $('#progress-bar-label')[0].innerHTML = Math.round(percentage) + "%";
+        });
+    }
+}
+
 $(document).ready(function() {
 
     $('#convert-file-form').submit(function(event) {
+
+        $('#progress-bar-container').show();
 
         var formData = {
             'file' : $('input[name=file]').val()
@@ -39,8 +56,7 @@ $(document).ready(function() {
         var data = new FormData();
         data.append('file', $('#file_input_file')[0].files[0]);
 
-
-        jQuery.ajax({
+        $.ajax({
             url: '/convert',
             data: data,
             cache: false,
@@ -49,9 +65,23 @@ $(document).ready(function() {
             method: 'POST',
             type: 'POST',
             enctype     : 'multipart/form-data',
-            success: function(data){
-                alert(data);
+            xhr: function() {
+                var myXhr = $.ajaxSettings.xhr();
+                if(myXhr.upload){
+                    myXhr.upload.addEventListener('progress',progress, false);
+                }
+                return myXhr;
+            },
+            success: function(url){
+                $('#upload-container').hide();
+                $('#progress-bar-container').hide();
+                $('#video-container video').attr('src',url)
+                $('#video-container').show();
+            },
+            error: function(XMLHttpRequest) {
+                alert('Error');
             }
+
         });
 
         event.preventDefault();

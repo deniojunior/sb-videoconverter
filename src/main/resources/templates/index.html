@@ -60,7 +60,24 @@
                             </div>
                         </form>
                     </div>
+
+                    <div id="video-container">
+                        <video controls="controls" autoplay="autoplay">
+                            <source src="" type="video/mp4" />
+                            O seu navegador não suporta a tag vídeo
+                        </video>
+                    </div>
+
+                    <div id="progress-bar-container">
+                        <div id="progress">
+                            <div id="bar"></div>
+                        </div>
+                        <div id="progress-bar-label">
+                            0%
+                        </div>
+                    </div>
                 </div>
+
             </main>
             <div class="mdl-layout__obfuscator"></div>
         </div>
@@ -68,5 +85,6 @@
         <script src="js/plugins/jquery.min.js"></script>
         <script defer src="js/plugins/material.min.js"></script>
         <script defer src="js/app.js"></script>
+
     </body>
 </html>

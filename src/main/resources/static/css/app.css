@@ -298,3 +298,31 @@ body .sb-videoconverter {
     font-size: 18px;
     font-weight: 600;
 }
+
+#video-container{
+    display: none;
+    text-align: center;
+    width: 100%    !important;
+    height: auto   !important;
+}
+#progress-bar-container{
+    margin-top: 20px;
+    display: none;
+}
+
+#progress {
+    width: 100%;
+    background-color: grey;
+}
+#bar {
+    width: 0%;
+    height: 15px;
+    background-color: green;
+}
+
+#progress-bar-label{
+    text-align: center;
+    margin-left: -10px;
+    color: white;
+    font-weight: 500;
+}

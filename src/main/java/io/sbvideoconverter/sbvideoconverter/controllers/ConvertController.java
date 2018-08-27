@@ -6,6 +6,7 @@ import io.sbvideoconverter.sbvideoconverter.services.ZencoderService;
 import io.sbvideoconverter.sbvideoconverter.util.Utility;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +31,10 @@ public class ConvertController {
     @PostMapping("/convert")
     public String convertFile(@RequestPart(value = "file") MultipartFile file) {
 
+        JSONObject response = new JSONObject();
         String history = "Uploading file...";
+        String filePublicUrl = "";
+
         try {
             Map<String, String> responseAmazonS3 = this.amazonS3Service.uploadFile(file);
 
@@ -47,16 +51,21 @@ public class ConvertController {
                 String outputFileName = uploadedFileName.split(Utility.FILE_NAME_SEPARATOR)[1];
                 outputFileName = FilenameUtils.removeExtension(outputFileName);
 
-                String outputFilePath = amazonS3Service.getS3FileTransferURL() + "converted_" + new Date().getTime() +
+                long time = new Date().getTime();
+                String outputFilePath = amazonS3Service.getS3FileTransferURL() + "converted_" + time +
+                        Utility.FILE_NAME_SEPARATOR + outputFileName + "." + ZencoderService.DEFAULT_OUTPUT_FORMAT;
+
+                filePublicUrl = amazonS3Service.getS3PublicURL() + "converted_" + time +
                         Utility.FILE_NAME_SEPARATOR + outputFileName + "." + ZencoderService.DEFAULT_OUTPUT_FORMAT;
 
                 Map<String, String> responseZencoder = zencoderService.convert(fileUrl, outputFilePath);
                 history += "Result: " + responseZencoder.get("status");
+                response.put("file-url", responseZencoder.get("file-url"));
             }
         }catch (SBVideoConverterException e){
             history += "Result: " + e.getMessage();
         }
 
-        return history;
+        return filePublicUrl;
     }
 }

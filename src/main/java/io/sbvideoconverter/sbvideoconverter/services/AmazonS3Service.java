@@ -84,8 +84,12 @@ public class AmazonS3Service {
         return result;
     }
 
-    public String getS3FileTransferURL(){
-        return "s3://"+this.bucketName+"/";
+    public String getS3FileTransferURL() {
+        return "s3://" + this.bucketName + "/";
+    }
+
+    public String getS3PublicURL(){
+        return "https://s3-" + this.region + ".amazonaws.com/" + this.bucketName + "/";
     }
 
     public String getBucketName() {
