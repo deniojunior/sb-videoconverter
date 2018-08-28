@@ -332,3 +332,48 @@ body .sb-videoconverter {
     color: white;
     font-weight: 500;
 }
+
+#title-mobile{
+    text-align: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    margin-bottom: 50px;
+    display: none;
+}
+
+@media (max-width: 500px){
+    .sb-videoconverter .sb-videoconverter__upload{
+        padding: 0px;
+        padding-top: 10px;
+        height: 100%;
+    }
+
+    .sb-videoconverter.mdl-layout .mdl-layout__content{
+         padding-top: 0px;
+    }
+
+    #video-container video {
+        min-width: 300px !important;
+        max-width: 300px !important;
+    }
+
+    #title-mobile{
+        display: block;
+    }
+
+    main{
+        height: 100%;
+    }
+}
+
+@media (min-width: 500px){
+    .sb-videoconverter .sb-videoconverter__upload{
+        padding: 0px;
+        padding-top: 10px;
+    }
+
+    .mdl-layout__header{
+        display: block !important;
+    }
+}

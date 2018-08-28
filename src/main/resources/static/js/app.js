@@ -169,7 +169,6 @@ $(document).ready(function() {
                             allowOutsideClick: false,
                         }).then(() => {
                             $('#upload-container').hide();
-                            $('#progress-bar-container').hide();
                             $('#video-container video').attr('src', fileUrl);
                             $('#video-container').show();
                         });
