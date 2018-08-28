@@ -32,21 +32,18 @@ public class ConvertController {
     public String convertFile(@RequestPart(value = "file") MultipartFile file) {
 
         JSONObject response = new JSONObject();
-        String history = "Uploading file...";
         String filePublicUrl = "";
 
         try {
             Map<String, String> responseAmazonS3 = this.amazonS3Service.uploadFile(file);
 
-            if (responseAmazonS3.get("status").equals("error")){
+            if (responseAmazonS3.get("status").equals("error")) {
                 throw new SBVideoConverterException("Falha ao realizar o upload para Amazon S3");
             }
 
             String fileUrl = responseAmazonS3.get("file-url");
-            history += "Result: " + (StringUtils.isEmpty(fileUrl) ? "error" : "success --> " + fileUrl);
 
             if (!StringUtils.isEmpty(fileUrl)) {
-                history += "Encoding file...";
                 String uploadedFileName = Utility.generateFileName(file, "uploaded_" + new Date().getTime());
                 String outputFileName = uploadedFileName.split(Utility.FILE_NAME_SEPARATOR)[1];
                 outputFileName = FilenameUtils.removeExtension(outputFileName);
@@ -59,13 +56,32 @@ public class ConvertController {
                         Utility.FILE_NAME_SEPARATOR + outputFileName + "." + ZencoderService.DEFAULT_OUTPUT_FORMAT;
 
                 Map<String, String> responseZencoder = zencoderService.convert(fileUrl, outputFilePath);
-                history += "Result: " + responseZencoder.get("status");
-                response.put("file-url", responseZencoder.get("file-url"));
+                response.put("status", responseZencoder.get("status"));
+                response.put("fileUrl", filePublicUrl);
+                response.put("message", responseZencoder.get("message"));
             }
-        }catch (SBVideoConverterException e){
-            history += "Result: " + e.getMessage();
+        } catch (SBVideoConverterException e) {
+            response.put("status", "error");
+            response.put("fileUrl", "");
+            response.put("message", e.getMessage());
         }
 
-        return filePublicUrl;
+        return response.toString();
+    }
+
+    @PostMapping("/progress")
+    public String checkConvertingProgress(@RequestPart(value = "jobId") String jobId) {
+        JSONObject response = new JSONObject();
+
+        try {
+            Map<String, String> responseZencoder = zencoderService.checkFileConvertingProgress(jobId);
+            response.put("status", responseZencoder.get("status"));
+            response.put("message", responseZencoder.get("message"));
+        }catch (Exception e){
+            response.put("status", "error");
+            response.put("message", e.getMessage());
+        }
+
+        return response.toString();
     }
 }

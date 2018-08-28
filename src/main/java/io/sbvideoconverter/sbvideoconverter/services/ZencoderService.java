@@ -65,18 +65,7 @@ public class ZencoderService {
             out.flush();
             out.close();
 
-            responseCode = connection.getResponseCode();
-
-            if (responseCode >= 200 && responseCode <= 299) {
-                result.put("status", "success");
-                result.put("message", Utility.readInputStreamToString(connection.getInputStream()));
-                result.put("response-code", responseCode + "");
-            } else {
-                result.put("status", "error");
-                result.put("message", "Zencode API Error: " + Utility.readInputStreamToString(connection.getErrorStream()));
-                result.put("response-code", responseCode + "");
-            }
-
+            result = this.getResponse(connection);
 
         }catch (FileNotFoundException e){
             result.put("status", "error");
@@ -87,6 +76,48 @@ public class ZencoderService {
             result.put("status", "error");
             result.put("message", e.getMessage());
             result.put("response-code", responseCode+"");
+        }
+
+        return result;
+    }
+
+    public Map<String, String> checkFileConvertingProgress(String jobId){
+        Map<String, String> result = new HashMap<>();
+        URL zencoderApi;
+
+        int responseCode = 0;
+        BufferedReader bufferedReader;
+        try {
+            zencoderApi = new URL(endpointUrl + "/jobs/" + jobId + "/progress");
+            HttpsURLConnection connection = (HttpsURLConnection) zencoderApi.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Zencoder-Api-Key", apiKey);
+
+            result = this.getResponse(connection);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("status", "error");
+            result.put("message", e.getMessage());
+            result.put("response-code", responseCode+"");
+        }
+
+        return result;
+    }
+
+    private Map<String,String> getResponse(HttpsURLConnection connection) throws IOException {
+        Map<String, String> result = new HashMap<>();
+        int responseCode = connection.getResponseCode();
+
+        if (responseCode >= 200 && responseCode <= 299) {
+            result.put("status", "success");
+            result.put("message", Utility.readInputStreamToString(connection.getInputStream()));
+            result.put("response-code", responseCode + "");
+        } else {
+            result.put("status", "error");
+            result.put("message", "Zencode API Error: " + Utility.readInputStreamToString(connection.getErrorStream()));
+            result.put("response-code", responseCode + "");
         }
 
         return result;

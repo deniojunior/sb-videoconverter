@@ -305,6 +305,11 @@ body .sb-videoconverter {
     width: 100%    !important;
     height: auto   !important;
 }
+
+#video-container video {
+    min-width: 360px !important;
+}
+
 #progress-bar-container{
     margin-top: 20px;
     display: none;

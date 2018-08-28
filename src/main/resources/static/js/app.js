@@ -28,63 +28,190 @@ function changeState() {
     }
 }
 
-function progress(e){
-
-    if(e.lengthComputable){
-        var max = e.total;
-        var current = e.loaded;
-
-        var percentage = (current * 100)/max;
-
-        var value = percentage + '%';
-        $("#bar").animate({width: value}, 75, 'linear', function() {
-            $('#progress-bar-label')[0].innerHTML = Math.round(percentage) + "%";
-        });
-    }
-}
-
 $(document).ready(function() {
 
     $('#convert-file-form').submit(function(event) {
 
-        $('#progress-bar-container').show();
+        if($('input[name=file]')[0].files.length == 0){
+            swal({
+                title: 'Selecione um arquivo para a conversão!',
+                type: 'error',
+                confirmButtonText: 'Ok',
+                allowOutsideClick: false,
+            });
+        }else {
 
-        var formData = {
-            'file' : $('input[name=file]').val()
-        };
+            swal({
+                title: 'Realizando o upload do arquivo...',
+                allowOutsideClick: false,
+                onOpen: () => {
+                    swal.showLoading()
+                }
+            });
+
+            var formData = {
+                'file': $('input[name=file]').val()
+            };
+
+            var data = new FormData();
+            data.append('file', $('#file_input_file')[0].files[0]);
+
+            $.ajax({
+                url: '/convert',
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST',
+                enctype: 'multipart/form-data',
+                success: function (data) {
+                    swal.close();
+                    swal({
+                        title: 'Convertendo o arquivo...',
+                        allowOutsideClick: false,
+                        onOpen: () => {
+                            swal.showLoading()
+                        }
+                    });
+
+                    var response = JSON.parse(data);
+
+                    if(response.status == "error"){
+                        swal.close();
+                        swal({
+                            title: 'Aconteceu um erro!',
+                            text: "Você tem certeza que tentou converter um arquivo de vídeo?",
+                            type: 'error',
+                            confirmButtonText: 'Tentar novamente',
+                            allowOutsideClick: false,
+                            onOpen: () => {
+                                swal.hideLoading()
+                            },
+                            onClose: () => {
+                                document.getElementById("convert-file-form").reset();
+                            }
+                        });
+                    }else{
+                        var apiResposeData = JSON.parse(response.message);
+                        var fileURL = response.fileUrl;
+                        var jobId =apiResposeData.id;
+
+                        checkConvertingProgress(jobId, fileURL);
+                    }
+                },
+                error: function (XMLHttpRequest) {
+                    swal({
+                        title: 'Aconteceu um erro inesperado!',
+                        text: JSON.stringify(XMLHttpRequest),
+                        type: 'error',
+                        confirmButtonText: 'Tentar novamente',
+                        allowOutsideClick: false,
+                        onOpen: () => {
+                            swal.hideLoading()
+                        },
+                        onClose: () => {
+                            document.getElementById("convert-file-form").reset();
+                        }
+                    });
+                }
+
+            });
+        }
+
+        event.preventDefault();
+    });
+
+    function checkConvertingProgress(jobId, fileUrl){
 
         var data = new FormData();
-        data.append('file', $('#file_input_file')[0].files[0]);
+        data.append('jobId', jobId);
 
         $.ajax({
-            url: '/convert',
+            url: '/progress',
             data: data,
             cache: false,
             contentType: false,
             processData: false,
             method: 'POST',
             type: 'POST',
-            enctype     : 'multipart/form-data',
-            xhr: function() {
-                var myXhr = $.ajaxSettings.xhr();
-                if(myXhr.upload){
-                    myXhr.upload.addEventListener('progress',progress, false);
+            enctype: 'multipart/form-data',
+            success: function (data) {
+
+                var response = JSON.parse(data);
+
+                if(response.status == "success") {
+
+                    var zencoderResponse = JSON.parse(response.message);
+
+                    if (zencoderResponse.state == "failed" || zencoderResponse.state == "cancelled") {
+
+                        document.getElementById("convert-file-form").reset();
+
+                        swal({
+                            title: 'Aconteceu um erro!',
+                            text: "Você tem certeza que tentou converter um arquivo de vídeo?",
+                            type: 'error',
+                            confirmButtonText: 'Tentar novamente',
+                            allowOutsideClick: false,
+                            onOpen: () => {
+                                swal.hideLoading()
+                            },
+                            onClose: () => {
+                                document.getElementById("convert-file-form").reset();
+                            }
+                        });
+                    } else if (zencoderResponse.state == "finished") {
+
+                        swal({
+                            title: 'Sua conversão terminou!',
+                            type: 'success',
+                            confirmButtonText: 'Assistir vídeo',
+                            allowOutsideClick: false,
+                        }).then(() => {
+                            $('#upload-container').hide();
+                            $('#progress-bar-container').hide();
+                            $('#video-container video').attr('src', fileUrl)
+                            $('#video-container').show();
+                        });
+                    } else {
+                        checkConvertingProgress(jobId, fileUrl);
+                    }
+                } else{
+                    swal({
+                        title: 'Aconteceu um erro!',
+                        text: "Você tem certeza que tentou converter um arquivo de vídeo?",
+                        type: 'error',
+                        confirmButtonText: 'Tentar novamente',
+                        allowOutsideClick: false,
+                        onOpen: () => {
+                            swal.hideLoading()
+                        },
+                        onClose: () => {
+                            document.getElementById("convert-file-form").reset();
+                        }
+                    });
                 }
-                return myXhr;
+
             },
-            success: function(url){
-                $('#upload-container').hide();
-                $('#progress-bar-container').hide();
-                $('#video-container video').attr('src',url)
-                $('#video-container').show();
-            },
-            error: function(XMLHttpRequest) {
-                alert('Error');
+            error: function (XMLHttpRequest) {
+                swal({
+                    title: 'Aconteceu um erro inesperado!',
+                    text: JSON.stringify(XMLHttpRequest),
+                    type: 'error',
+                    confirmButtonText: 'Tentar novamente',
+                    allowOutsideClick: false,
+                    onOpen: () => {
+                        swal.hideLoading()
+                    },
+                    onClose: () => {
+                        document.getElementById("convert-file-form").reset();
+                    }
+                });
             }
 
         });
+    }
 
-        event.preventDefault();
-    });
 
 });
