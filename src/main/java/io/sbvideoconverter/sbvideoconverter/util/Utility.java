@@ -1,16 +1,12 @@
 package io.sbvideoconverter.sbvideoconverter.util;
 
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class Utility {
 
-    private static final String TEMP_DIR  = "tmp/";
+    private static final String TEMP_DIR  = "temp/";
     public static final String FILE_NAME_SEPARATOR  = "___";
 
     public static File convertMultiPartToFile(MultipartFile file) throws IOException {
@@ -20,24 +16,6 @@ public class Utility {
         fos.close();
 
         return convertedFile;
-    }
-
-    public static MultipartFile convertFileToMultipartFile(File file){
-        try {
-            Path path = Paths.get(file.getAbsolutePath());
-            String name = file.getName();
-            String originalFileName = file.getName();
-            String contentType = Files.probeContentType(path);
-
-            byte[] content = Files.readAllBytes(path);
-
-            return new MockMultipartFile(name,
-                    originalFileName, contentType, content);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     public static String generateFileName(MultipartFile multiPart, String prefix) {

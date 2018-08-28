@@ -103,7 +103,6 @@ $(document).ready(function() {
                 error: function (XMLHttpRequest) {
                     swal({
                         title: 'Aconteceu um erro inesperado!',
-                        text: JSON.stringify(XMLHttpRequest),
                         type: 'error',
                         confirmButtonText: 'Tentar novamente',
                         allowOutsideClick: false,
@@ -171,7 +170,7 @@ $(document).ready(function() {
                         }).then(() => {
                             $('#upload-container').hide();
                             $('#progress-bar-container').hide();
-                            $('#video-container video').attr('src', fileUrl)
+                            $('#video-container video').attr('src', fileUrl);
                             $('#video-container').show();
                         });
                     } else {
@@ -197,7 +196,6 @@ $(document).ready(function() {
             error: function (XMLHttpRequest) {
                 swal({
                     title: 'Aconteceu um erro inesperado!',
-                    text: JSON.stringify(XMLHttpRequest),
                     type: 'error',
                     confirmButtonText: 'Tentar novamente',
                     allowOutsideClick: false,
@@ -212,6 +210,4 @@ $(document).ready(function() {
 
         });
     }
-
-
 });

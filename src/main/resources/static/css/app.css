@@ -308,6 +308,7 @@ body .sb-videoconverter {
 
 #video-container video {
     min-width: 360px !important;
+    max-width: 500px !important;
 }
 
 #progress-bar-container{

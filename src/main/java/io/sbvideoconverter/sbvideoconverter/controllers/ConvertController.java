@@ -38,12 +38,12 @@ public class ConvertController {
             Map<String, String> responseAmazonS3 = this.amazonS3Service.uploadFile(file);
 
             if (responseAmazonS3.get("status").equals("error")) {
-                throw new SBVideoConverterException("Falha ao realizar o upload para Amazon S3");
+                throw new SBVideoConverterException(responseAmazonS3.get("message"));
             }
 
             String fileUrl = responseAmazonS3.get("file-url");
 
-            if (!StringUtils.isEmpty(fileUrl)) {
+            if(!StringUtils.isEmpty(fileUrl)) {
                 String uploadedFileName = Utility.generateFileName(file, "uploaded_" + new Date().getTime());
                 String outputFileName = uploadedFileName.split(Utility.FILE_NAME_SEPARATOR)[1];
                 outputFileName = FilenameUtils.removeExtension(outputFileName);
