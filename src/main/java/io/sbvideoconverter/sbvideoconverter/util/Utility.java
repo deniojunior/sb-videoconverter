@@ -9,11 +9,22 @@ public class Utility {
     private static final String TEMP_DIR  = "temp/";
     public static final String FILE_NAME_SEPARATOR  = "___";
 
+    public static void pipeStreams(java.io.InputStream source, java.io.OutputStream destination) throws IOException {
+        // 1kb buffer
+        byte [] buffer = new byte[1024];
+        int read = 0;
+        while((read=source.read(buffer)) != -1) {
+            destination.write(buffer, 0, read);
+        }
+        destination.flush();
+    }
+
     public static File convertMultiPartToFile(MultipartFile file) throws IOException {
         File convertedFile = new File(TEMP_DIR + file.getOriginalFilename());
-        FileOutputStream fos = new FileOutputStream(convertedFile);
-        fos.write(file.getBytes());
-        fos.close();
+
+        try (FileOutputStream fos = new FileOutputStream(convertedFile)) {
+            pipeStreams(file.getInputStream(), fos);
+        }
 
         return convertedFile;
     }
